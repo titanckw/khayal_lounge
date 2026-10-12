@@ -1,4 +1,7 @@
-<?php $activePage = 'drinks'; ?>
+<?php
+$activePage = 'drinks';
+require_once 'includes/img.php';
+?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -6,11 +9,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Drinks - Khayal</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link
-    href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Jost:wght@300;400;500;600&display=swap"
-    rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
+<?php include 'includes/head.php'; ?>
 </head>
 
 <body>
@@ -65,7 +64,7 @@
         ];
         foreach ($drinks as $d): ?>
           <div class="menu-item">
-            <img src="images/<?php echo $d; ?>.jpg" alt="Drink" />
+            <?php echo img($d, 'Khayal drink', '(max-width:600px) 100vw, 330px'); ?>
           </div>
         <?php endforeach; ?>
       </div>

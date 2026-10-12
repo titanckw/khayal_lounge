@@ -1,13 +1,39 @@
-<?php $activePage = 'menu'; ?>
+<?php
+$activePage = 'menu';
+require_once 'includes/img.php';
+require_once 'includes/icons.php';
+require_once 'includes/reviews.php';
+session_start(['cache_limiter' => '']);   // no cache headers added by the session, so the page stays cacheable
+
+$reviewError = '';
+$old = ['name' => '', 'email' => '', 'rating' => '5', 'text' => ''];
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['review_submit'])) {
+    $result = reviews_handle_submission($_POST);
+    if ($result['ok']) {
+        header('Location: reviews.php?thanks=1#reviews');   // straight to the reviews page, where it now appears
+        exit;
+    }
+    $reviewError = $result['error'];
+    $old = [
+        'name'   => (string) ($_POST['review_name'] ?? ''),
+        'email'  => (string) ($_POST['review_email'] ?? ''),
+        'rating' => (string) ($_POST['review_rating'] ?? '5'),
+        'text'   => (string) ($_POST['review_text'] ?? ''),
+    ];
+}
+
+// Fresh token + timestamp for the spam checks
+$_SESSION['review_token'] = bin2hex(random_bytes(16));
+$_SESSION['review_form_time'] = time();
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Our Menu - Khayal</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
+<?php include 'includes/head.php'; ?>
 </head>
 <body>
 
@@ -25,7 +51,8 @@
 
       <!-- Search bar -->
       <div class="menu-search">
-        <input type="text" id="searchInput" placeholder="Search menu items..." oninput="searchMenu()" />
+        <?php echo icon('search', 'search-icon'); ?>
+        <input type="text" id="searchInput" placeholder="Search menu items..." oninput="searchMenu()" aria-label="Search menu items" />
       </div>
 
       <!-- Filter tabs -->
@@ -41,7 +68,7 @@
       <!-- Menu grid -->
       <div class="menu-grid" id="menuGrid">
         <div class="menu-item" data-cat="mandi" data-name="chicken mandi">
-          <img src="images/fragrant-rice-with-chicken-mandi.jpg" alt="Chicken Mandi" />
+          <?php echo img('chicken-mandi', 'Chicken Mandi', '(max-width:600px) 100vw, 390px'); ?>
           <div class="menu-item-body">
             <h3>Chicken Mandi</h3>
             <span class="spicy-tag">Spicy</span>
@@ -49,74 +76,74 @@
           </div>
         </div>
         <div class="menu-item" data-cat="mandi" data-name="full goat mandi">
-          <img src="images/full-goat-mandi-with-rice.jpg" alt="Full Goat Mandi" />
+          <?php echo img('goat-mandi', 'Full Goat Mandi', '(max-width:600px) 100vw, 390px'); ?>
           <div class="menu-item-body">
             <h3>Full Goat Mandi</h3>
             <span class="spicy-tag">Spicy</span>
             <p>Premium goat meat slow-cooked with fragrant rice and special spice blend</p>
           </div>
         </div>
-        <div class="menu-item" data-cat="mandi" data-name="beef hanidh">
-          <img src="images/beef-laham-hanidh-meat-dish.jpg" alt="Beef Hanidh" />
+        <div class="menu-item" data-cat="mandi" data-name="goat hanidh">
+          <?php echo img('laham-hanidh', 'Goat Hanidh', '(max-width:600px) 100vw, 390px'); ?>
           <div class="menu-item-body">
             <h3>Goat Hanidh</h3>
             <span class="spicy-tag">Spicy</span>
             <p>Laham Hanidh - goat meat cooked in traditional underground oven style</p>
           </div>
         </div>
-        <div class="menu-item" data-cat="burger" data-name="khayal deluxe burger">
-          <img src="images/food-dsc0506.jpg" alt="Khayal Deluxe Burger" />
+        <div class="menu-item" data-cat="burger" data-name="fish fingers">
+          <?php echo img('fish-fingers', 'Fish Fingers', '(max-width:600px) 100vw, 390px'); ?>
           <div class="menu-item-body">
             <h3>Fish Fingers</h3>
             <p>Crispy, golden and tender fish fingers served with Tarta sauce and choice of your accompaniment</p>
           </div>
         </div>
-        <div class="menu-item" data-cat="burger" data-name="spicy chicken burger">
-          <img src="images/club-sandwich.png" alt="Spicy Chicken Burger" />
+        <div class="menu-item" data-cat="burger" data-name="club sandwich">
+          <?php echo img('club-sandwich', 'Club Sandwich', '(max-width:600px) 100vw, 390px'); ?>
           <div class="menu-item-body">
             <h3>Club Sandwich</h3>
             <span class="spicy-tag">Spicy</span>
             <p>Classic layers of toasted bread, sliced grilled chicken breast, sliced beef, ripe tomatoes, onions all bound together with mustard mayonnaise</p>
           </div>
         </div>
-        <div class="menu-item" data-cat="sandwich" data-name="mixed grill sandwich">
-          <img src="images/mixed-grill-sandwich.png" alt="Mixed Grill Sandwich" />
+        <div class="menu-item" data-cat="sandwich" data-name="bbq sandwich">
+          <?php echo img('bbq-sandwich', 'BBQ Sandwich', '(max-width:600px) 100vw, 390px'); ?>
           <div class="menu-item-body">
             <h3>BBQ Sandwich</h3>
             <p>Crispy macom, juicy tomato sliced, fresh lettuce and creamy mayonnaise on a toasted bread with cheddar cheese.</p>
           </div>
         </div>
-        <div class="menu-item" data-cat="sandwich" data-name="spiced lamb sandwich">
-          <img src="images/food-dsc0484.jpg" alt="Spiced Lamb Sandwich" />
+        <div class="menu-item" data-cat="sandwich" data-name="jerky chicken">
+          <?php echo img('jerky-chicken', 'Jerky Chicken', '(max-width:600px) 100vw, 390px'); ?>
           <div class="menu-item-body">
             <h3>Jerky Chicken</h3>
             <span class="spicy-tag">Spicy</span>
             <p>Smoky, spicy chicken on bone served with salsa and your choice of accompaniment</p>
           </div>
         </div>
-        <div class="menu-item" data-cat="side" data-name="hummus greens salad">
-          <img src="images/hummus-salad.jpg" alt="Hummus &amp; Greens Salad" />
+        <div class="menu-item" data-cat="side" data-name="cobb salad">
+          <?php echo img('cobb-salad', 'Cobb Salad', '(max-width:600px) 100vw, 390px'); ?>
           <div class="menu-item-body">
             <h3>Cobb Salad</h3>
             <p>Fresh lettuce, boiled egg, macon, tomatoes, avocado, sweetcorn and feta cheese dressed with honey lime dressing</p>
           </div>
         </div>
-        <div class="menu-item" data-cat="side" data-name="fragrant rice pilaf">
-          <img src="images/food-dsc0427.jpg" alt="Fragrant Rice Pilaf" />
+        <div class="menu-item" data-cat="side" data-name="mushroom beef steak">
+          <?php echo img('beef-steak', 'Mushroom Beef Steak', '(max-width:600px) 100vw, 390px'); ?>
           <div class="menu-item-body">
             <h3>Mushroom Beef Steak</h3>
             <p>Grilled juicy steak cooked to perfection served with mushroom sauce and choice of accompaniment</p>
           </div>
         </div>
-        <div class="menu-item" data-cat="soup" data-name="traditional lentil soup">
-          <img src="images/platter-2.jpeg" alt="Traditional Lentil Soup" />
+        <div class="menu-item" data-cat="soup" data-name="platter">
+          <?php echo img('platter', 'Platter', '(max-width:600px) 100vw, 390px'); ?>
           <div class="menu-item-body">
             <h3>Platter</h3>
             <p>Platter for 2 people</p>
           </div>
         </div>
-        <div class="menu-item" data-cat="soup" data-name="spiced tomato soup">
-          <img src="images/food-dsc0468.jpg" alt="Spiced Tomato Soup" />
+        <div class="menu-item" data-cat="soup" data-name="plantains">
+          <?php echo img('plantains', 'Plantains', '(max-width:600px) 100vw, 390px'); ?>
           <div class="menu-item-body">
             <h3>Plantains</h3>
             <span class="spicy-tag">Spicy</span>
@@ -127,75 +154,47 @@
     </div>
   </section>
 
-  <!-- CUSTOMER REVIEWS — brown bg -->
-  <section class="reviews-section">
+  <!-- LEAVE A REVIEW — brand bg, white form card. Submitted reviews appear on reviews.php -->
+  <section class="reviews-section" id="review-form">
     <div class="section-inner">
-      <h2 class="section-title" style="text-align:left;color:#fff;margin-bottom:1.5rem">Customer Reviews</h2>
-      <div class="reviews-grid">
-        <div class="review-card">
-          <div class="stars">★★★★★</div>
-          <p>"Amazing food! Will definitely come back."</p>
-          <strong>John Doe</strong>
-        </div>
-        <div class="review-card">
-          <div class="stars">★★★★★</div>
-          <p>"Best halal restaurant in town!"</p>
-          <strong>Sarah Ahmed</strong>
-        </div>
-      </div>
+      <h2 class="section-title" style="text-align:left;color:#fff;margin-bottom:0.5rem">Leave a Review</h2>
+      <p class="review-intro">Enjoyed your meal? Tell us about it &mdash; your review will appear on our
+        <a href="reviews.php">guest reviews page</a> straight away.</p>
 
-      <!-- Leave a review form — white card -->
       <div class="review-form-wrap">
-        <h3>Leave a Review</h3>
-        <?php
-        $reviewSuccess = false;
-        $reviewError   = '';
-        if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['review_submit'])) {
-            $rName   = htmlspecialchars(trim($_POST['review_name'] ?? ''));
-            $rEmail  = htmlspecialchars(trim($_POST['review_email'] ?? ''));
-            $rRating = htmlspecialchars(trim($_POST['review_rating'] ?? ''));
-            $rText   = htmlspecialchars(trim($_POST['review_text'] ?? ''));
-            if ($rName && $rEmail && $rText) {
-                $to      = 'info@khayal-lounge.co.ke';
-                $subject = "New Review from $rName";
-                $body    = "Name: $rName\nEmail: $rEmail\nRating: $rRating\n\nReview:\n$rText";
-                $headers = "From: noreply@khayal-lounge.co.ke\r\nReply-To: $rEmail";
-                mail($to, $subject, $body, $headers);
-                $reviewSuccess = true;
-            } else {
-                $reviewError = 'Please fill in all required fields.';
-            }
-        }
-        ?>
-        <?php if ($reviewSuccess): ?>
-          <p style="color:#4caf50;font-weight:600;margin-bottom:1rem">Thank you for your review!</p>
-        <?php elseif ($reviewError): ?>
-          <p style="color:#e53935;margin-bottom:1rem"><?php echo $reviewError; ?></p>
+        <h3>Share Your Experience</h3>
+        <?php if ($reviewError): ?>
+          <div class="form-alert form-alert-error"><?php echo icon('alert'); ?> <?php echo htmlspecialchars($reviewError); ?></div>
         <?php endif; ?>
-        <form method="POST" action="menu.php#reviews">
+        <form method="POST" action="menu.php#review-form">
+          <input type="hidden" name="token" value="<?php echo $_SESSION['review_token']; ?>" />
+          <!-- hidden field: only spam bots fill this in -->
+          <div class="hp-field" aria-hidden="true">
+            <label>Leave this empty <input type="text" name="website" tabindex="-1" autocomplete="off" /></label>
+          </div>
           <div class="form-row">
             <div class="form-group">
-              <label>Name *</label>
-              <input type="text" name="review_name" placeholder="Your name" required />
+              <label for="review_name">Name *</label>
+              <input type="text" id="review_name" name="review_name" placeholder="Your name" maxlength="60" required
+                value="<?php echo htmlspecialchars($old['name']); ?>" />
             </div>
             <div class="form-group">
-              <label>Email *</label>
-              <input type="email" name="review_email" placeholder="Your email" required />
+              <label for="review_email">Email * <span class="field-note">(private &mdash; never shown)</span></label>
+              <input type="email" id="review_email" name="review_email" placeholder="Your email" required
+                value="<?php echo htmlspecialchars($old['email']); ?>" />
             </div>
           </div>
           <div class="form-group">
-            <label>Rating</label>
-            <select name="review_rating">
-              <option>5 Stars - Excellent</option>
-              <option>4 Stars - Very Good</option>
-              <option>3 Stars - Good</option>
-              <option>2 Stars - Fair</option>
-              <option>1 Star - Poor</option>
+            <label for="review_rating">Rating</label>
+            <select id="review_rating" name="review_rating">
+              <?php foreach ([5 => 'Excellent', 4 => 'Very Good', 3 => 'Good', 2 => 'Fair', 1 => 'Poor'] as $n => $label): ?>
+                <option value="<?php echo $n; ?>"<?php echo ((int) $old['rating'] === $n) ? ' selected' : ''; ?>><?php echo $n . ($n === 1 ? ' Star' : ' Stars') . ' - ' . $label; ?></option>
+              <?php endforeach; ?>
             </select>
           </div>
           <div class="form-group">
-            <label>Review *</label>
-            <textarea name="review_text" placeholder="Share your experience..."></textarea>
+            <label for="review_text">Review *</label>
+            <textarea id="review_text" name="review_text" placeholder="Share your experience..." maxlength="1000" required><?php echo htmlspecialchars($old['text']); ?></textarea>
           </div>
           <button type="submit" name="review_submit" class="submit-btn-full">Submit Review</button>
         </form>

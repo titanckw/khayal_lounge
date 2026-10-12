@@ -1,5 +1,6 @@
 <?php
 $activePage = 'contact';
+require_once 'includes/icons.php';
 
 $success = false;
 $error = '';
@@ -36,11 +37,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Contact - Khayal</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link
-    href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Jost:wght@300;400;500;600&display=swap"
-    rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
+<?php include 'includes/head.php'; ?>
 </head>
 
 <body>
@@ -57,19 +54,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       <h2>Get in Touch</h2>
       <div class="contact-block">
         <h4>Call Us</h4>
-        <a href="tel:+254706540367">📞 +254 706 540367</a>
+        <a href="tel:+254706540367"><?php echo icon('phone'); ?> +254 706 540367</a>
       </div>
       <div class="contact-block">
         <h4>Email Us</h4>
-        <a href="mailto:info@khayal-lounge.co.ke">✉ info@khayal-lounge.co.ke</a>
+        <a href="mailto:info@khayal-lounge.co.ke"><?php echo icon('mail'); ?> info@khayal-lounge.co.ke</a>
       </div>
       <div class="contact-block">
         <h4>Visit Us</h4>
-        <a href="https://maps.app.goo.gl/MVTEsyfsCYEMwdAc8?g_st=aw" target="_blank">View on Google Maps</a>
+        <a href="https://maps.app.goo.gl/MVTEsyfsCYEMwdAc8?g_st=aw" target="_blank" rel="noopener"><?php echo icon('map-pin'); ?> View on Google Maps</a>
       </div>
       <div class="contact-block">
         <h4>Hours</h4>
-        <p>Open Daily: 07:00 AM – 11:00 PM</p>
+        <p><?php echo icon('clock'); ?> Open Daily: 07:00 AM – 11:00 PM</p>
       </div>
     </div>
 
@@ -77,14 +74,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       <h2>Send us a Message</h2>
 
       <?php if ($success): ?>
-        <div
-          style="background:rgba(76,175,80,0.15);border:1px solid #4caf50;border-radius:8px;padding:1rem 1.25rem;margin-bottom:1.5rem;color:#4caf50;font-weight:600;">
-          ✓ Thank you! Your message has been sent. We'll get back to you soon.
+        <div class="form-alert form-alert-success" role="status">
+          <?php echo icon('check'); ?> Thank you! Your message has been sent. We'll get back to you soon.
         </div>
       <?php elseif ($error): ?>
-        <div
-          style="background:rgba(229,57,53,0.12);border:1px solid #e53935;border-radius:8px;padding:1rem 1.25rem;margin-bottom:1.5rem;color:#e53935;">
-          <?php echo $error; ?>
+        <div class="form-alert form-alert-error" role="alert">
+          <?php echo icon('alert'); ?> <?php echo $error; ?>
         </div>
       <?php endif; ?>
 

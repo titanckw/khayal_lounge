@@ -1,52 +1,51 @@
 # Khayal Website — Shared Hosting Package
 
-## Upload Instructions
-1. Upload the entire contents of this folder to your public_html (or www) directory via File Manager or FTP.
-2. Make sure your hosting supports PHP (any version 7.4+). Most shared hosts do by default.
-3. Add your images to the /images/ folder as listed below.
-4. Visit your domain — done!
+## Upload
+1. Upload the entire contents of this folder (including the hidden .htaccess file) to public_html via File Manager or FTP.
+2. Needs PHP 7.4+ (any shared host).
 
----
+## Brand colours (style.css, top of file)
+--brand   #A0430A   buttons, headings, brand-coloured sections
+--bg      #DFE8E7   page background
+--brand-deep / --brand-darkest are darker shades of --brand (button hover, footer).
+Change the colour once in :root and the whole site follows.
 
-## File Structure
+## Images
+All photos are WebP, in several sizes, so phones download small files and desktops download larger ones.
+They're output with the helper in includes/img.php:
 
-```
-/
-├── index.php          ← Home page
-├── menu.php           ← Food menu + review form
-├── drinks.php         ← Drinks menu
-├── gallery.php        ← Photo gallery
-├── contact.php        ← Contact + working email form
-├── style.css          ← All styles (do not rename)
-├── includes/
-│   ├── nav.php        ← Shared navigation
-│   └── footer.php     ← Shared footer
-└── images/
-    ├── khayal-logo.png                        ← Logo (used everywhere)
-    ├── hero-image.jpg                         ← Hero background (index)
-    ├── fragrant-rice-with-chicken-mandi.jpg   ← Chicken Mandi
-    ├── beef-laham-hanidh-meat-dish.jpg        ← Beef Hanidh
-    ├── full-goat-mandi-with-rice.jpg          ← Full Goat Mandi
-    ├── grilled-fresh-fish-rustica-style.jpg   ← Rustica Fish
-    ├── deluxe-burger-halal.jpg                ← Khayal Deluxe Burger
-    ├── spicy-chicken-burger.jpg               ← Spicy Chicken Burger
-    ├── mixed-grill-sandwich.jpg               ← Mixed Grill Sandwich
-    ├── lamb-sandwich-halal.jpg                ← Spiced Lamb Sandwich
-    ├── hummus-salad.jpg                       ← Hummus & Greens Salad
-    ├── rice-pilaf.jpg                         ← Fragrant Rice Pilaf
-    ├── lentil-soup.jpg                        ← Traditional Lentil Soup
-    ├── tomato-soup-spiced.jpg                 ← Spiced Tomato Soup
-    └── interior/
-        └── dsc-1751.jpg                       ← Restaurant interior (hero + story + gallery)
-```
+    <?php echo img('chicken-mandi', 'Chicken Mandi', '(max-width:600px) 100vw, 285px'); ?>
 
----
+Image names and sizes are listed in includes/image-manifest.php.
+To ADD a photo: resize/convert it to WebP at the widths you want (e.g. 400 and 800 wide), name the files
+  my-dish-400.webp and my-dish-800.webp, put them in /images/, and add a line to image-manifest.php
+  ('my-dish' => ['widths' => [400, 800], 'w' => 800, 'h' => <height of the 800 file>]).
+Original full-size photos are NOT included in this package (they were ~95 MB) — keep them in your own archive.
 
-## Contact Form
-The contact form on contact.php sends emails to info@khayal-lounge.co.ke using PHP's mail().
-Most shared hosts have mail() enabled. If emails don't arrive:
-- Check your hosting control panel for a mail log
-- Some hosts require SMTP — ask your host or use a plugin like PHPMailer with SMTP credentials
+## Guest reviews
+Visitors submit a review on menu.php (bottom of the page). It is saved instantly and shows at the top of reviews.php.
+- Reviews are stored in data/reviews.json. The data/ folder must be writable by PHP (permissions 755, or 775/777 if your
+  host requires it). If a review ever fails to save, that's the first thing to check.
+- Visitor emails are NOT saved on the site; they're only emailed to info@khayal-lounge.co.ke with each new review.
+- To remove a review: open data/reviews.json in File Manager and delete that review's block { ... } (keep the commas right).
+- Spam protection: hidden trap field, per-visit form token, minimum fill-in time, and one review per minute per visitor.
+- data/.htaccess stops visitors opening the file directly (Apache/LiteSpeed).
 
-## Review Form
-The review form on menu.php also sends submissions to info@khayal-lounge.co.ke.
+## Icons
+Icons are inline SVG (no extra downloads). Use <?php echo icon('phone'); ?> and <?php echo star_rating(4); ?>.
+The available icons are listed in includes/icons.php.
+
+## Files
+index.php, menu.php, drinks.php, reviews.php, contact.php   pages
+includes/nav.php, footer.php                   shared navigation / footer
+includes/head.php                              shared <head> (fonts, stylesheet)
+includes/img.php, image-manifest.php           image helper
+includes/icons.php                             icon set
+includes/reviews.php                           saving/validating reviews
+data/reviews.json                              the saved reviews
+style.css                                      all styles
+.htaccess                                      compression + browser caching (Apache/LiteSpeed)
+
+## Forms
+The contact form and new-review notifications email info@khayal-lounge.co.ke using PHP mail(). If emails don't arrive, check your host's
+mail log or ask them about SMTP.
