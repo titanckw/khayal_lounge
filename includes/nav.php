@@ -9,8 +9,8 @@ function navLink($href, $label, $page, $activePage) {
 ?>
 <?php echo icons_sprite(); ?>
 <nav class="navbar">
-  <a href="index.php" class="logo">
-    <?php echo img('logo', 'Khayal', '78px', ['eager' => true]); ?>
+  <a href="index.php" class="logo" aria-label="Khayal Home">
+    <img src="images/logo.png" alt="Khayal Lounge" width="180" height="110" loading="eager" decoding="async" />
   </a>
   <div class="nav-links">
     <?php navLink('index.php',   'Home',       'home',    $activePage); ?>

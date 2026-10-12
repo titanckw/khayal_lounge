@@ -5,7 +5,7 @@ require_once __DIR__ . '/icons.php';
 <footer class="footer">
   <div class="footer-inner">
     <div class="footer-logo">
-      <?php echo img('logo-light', 'Khayal', '114px'); ?>
+      <img src="images/logo.png" alt="Khayal Lounge" width="180" height="110" loading="lazy" decoding="async" />
     </div>
     <div class="footer-col">
       <h4>Quick Links</h4>
